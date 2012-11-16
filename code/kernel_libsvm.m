@@ -1,7 +1,7 @@
 function [test_err info] = kernel_libsvm(X, Y, Xtest, Ytest, kernel)
 % Trains a SVM using libsvm and evaluates on test data.
 %
-% Usage: 
+% Usage:
 %
 %   [TEST_ERR INFO] = KERNEL_LIBSVM(X, Y, XTEST, YTEST, KERNEL)
 %
@@ -25,7 +25,7 @@ function [test_err info] = kernel_libsvm(X, Y, Xtest, Ytest, kernel)
 K = kernel(X, X);
 Ktest = kernel(X, Xtest);
 
-% Use built-in libsvm cross validation to choose the C regularization 
+% Use built-in libsvm cross validation to choose the C regularization
 % parameter.
 crange = 10.^[-10:2:4];
 for i = 1:numel(crange)
