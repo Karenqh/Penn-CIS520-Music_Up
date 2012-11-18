@@ -22,10 +22,8 @@ X_tr = X';  % DXN
 
 % Using for loop. Later I may vectorize the loop
 for i = 1:m
-    for j = 1:n
-        K(i,j) = sum(min(X2_tr(:, i), X_tr(:, j)));
-    end
+    K(i,:) = sum(bsxfun(@min, X2_tr(:, i), X_tr));
+%     for j = 1:n
+%         K(i,j) = sum(min(X2_tr(:, i), X_tr(:, j)));
+%     end
 end
-
-% % After you've computed K, make sure not a sparse matrix anymore
-% K = full(K);
