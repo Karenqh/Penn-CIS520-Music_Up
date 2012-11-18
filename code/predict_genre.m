@@ -1,5 +1,5 @@
-function ranks = predict_genre(Xt_lyrics, Xq_lyrics, Ytrain)
-%                                Xt_audio, Xq_audio, 
+function ranks = predict_genre(Xt_audio, Xq_audio,Ytrain)
+%                                 Xt_lyrics, Xq_lyrics, 
 %                                Yt)
 % Returns the predicted rankings, given lyric and audio features.
 %
@@ -18,28 +18,17 @@ function ranks = predict_genre(Xt_lyrics, Xq_lyrics, Ytrain)
 
 % YOUR CODE GOES HERE
 % THIS IS JUST AN EXAMPLE
-N = size(Xq_lyrics, 1);
-scores = zeros(N, 10);
+% N = size(Xq_lyrics, 1);
+% scores = zeros(N, 10);
 
 % Scale the feature vector
-Xt = bsxfun(@rdivide, Xt_lyrics, sum(Xt_lyrics, 2));
-Xq = bsxfun(@rdivide, Xq_lyrics, sum(Xq_lyrics, 2));
+% Xt = bsxfun(@rdivide, Xt_lyrics, sum(Xt_lyrics, 2));
+% Xq = bsxfun(@rdivide, Xq_lyrics, sum(Xq_lyrics, 2));
 
-% D = Xq*Xt'; % Poly kernel
-D = kernel_intersection(Xt, Xq);  % Intersection kernel using hist
-Dtemp = D;
-for j = 1:10
-    [~, idx] = max(Dtemp, [], 2);
-    ynn = idx(:, 1);
-    yhat = Ytrain(ynn);
-    setmin = bsxfun(@eq,Ytrain',yhat);
-    Dtemp(setmin) = -999;
-   
-    for i=1:N
-        scores(i, yhat(i)) = 11 -j;
-    end
-end
+Xt = bsxfun(@rdivide, Xt_audio, sum(Xt_audio, 1));
+Xq = bsxfun(@rdivide, Xq_audio, sum(Xq_audio, 1));
 
-ranks = get_ranks(scores);
-end
+ranks = just_kernel_model(Xt, Xq, Ytrain, 10);
+% ranks = get_ranks(scores);
+
 
