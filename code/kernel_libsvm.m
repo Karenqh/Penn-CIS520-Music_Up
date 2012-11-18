@@ -1,4 +1,4 @@
-function [test_err info] = kernel_libsvm(X, Y, Xtest, Ytest, kernel)
+function [xval_err info] = kernel_libsvm(Xtrain, Ytrain, Xtest, Ytest, kernel)
 % Trains a SVM using libsvm and evaluates on test data.
 %
 % Usage:
@@ -21,23 +21,30 @@ function [test_err info] = kernel_libsvm(X, Y, Xtest, Ytest, kernel)
 % The first step is necessary to create a function that only depends on two
 % arguments from the KERNEL_POLY function which takes 3.
 
+% % Scale the feature vector
+% Xtrain = bsxfun(@rdivide, Xtrain, sum(Xtrain, 2));
+% Xtest = bsxfun(@rdivide, Ytrain, sum(Xtest, 2));
+
 % Compute kernel matrices for training and testing.
-K = kernel(X, X);
-Ktest = kernel(X, Xtest);
+K = kernel(Xtrain, Xtrain);
+Ktest = kernel(Xtrain, Xtest);
+display('Kernel is done!')
 
 % Use built-in libsvm cross validation to choose the C regularization
 % parameter.
-crange = 10.^[-10:2:4];
-for i = 1:numel(crange)
-    acc(i) = svmtrain(Y, [(1:size(K,1))' K], sprintf('-t 4 -v 10 -c %g', crange(i)));
-end
-[~, bestc] = max(acc);
-fprintf('Cross-val chose best C = %g\n', crange(bestc));
+crange = 10.^[-10:2:4];  % need to be changed later
+% for i = 1:numel(crange)
+%     acc(i) = svmtrain(Ytrain, [(1:size(K,1))' K], sprintf('-t 4 -v 10 -c %g', crange(i)));
+% end
+% [~, bestc] = max(acc);
+% fprintf('Cross-val chose best C = %g\n', crange(bestc));
+
+bestc = 7;
 
 % Train and evaluate SVM classifier using libsvm
-model = svmtrain(Y, [(1:size(K,1))' K], sprintf('-t 4 -c %g', crange(bestc)));
-[yhat acc vals] = svmpredict(Ytest, [(1:size(Ktest,1))' Ktest], model);
-test_err = mean(yhat~=Ytest);
+model = svmtrain(Ytrain, [(1:size(K,1))' K], sprintf('-t 4 -c %g -b 1', crange(bestc)));
+[yhat acc vals] = svmpredict(Ytest, [(1:size(Ktest,1))' Ktest], model, '-b 1');
+xval_err = mean(yhat~=Ytest);
 
 % Optionally we can look at more information from training/testing.
 info.vals = vals;
