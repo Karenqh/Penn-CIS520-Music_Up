@@ -1,13 +1,13 @@
 clear;
 % pack;
 load music_dataset.mat 
-% load Xtest.mat 
-% load Xtrain.mat 
-% load Ytest.mat
-% load Ytrain.mat
+load Xtest.mat 
+load Xtrain.mat 
+load Ytest.mat
+load Ytrain.mat
 
-% [Xt_lyrics] = make_lyrics_sparse(train, vocab);
-% [Xq_lyrics] = make_lyrics_sparse(quiz, vocab);
+[Xt_lyrics] = make_lyrics_sparse(train, vocab);
+[Xq_lyrics] = make_lyrics_sparse(quiz, vocab);
 
 
 Yt = zeros(numel(train), 1);
@@ -15,8 +15,8 @@ for i=1:numel(train)
     Yt(i) = genre_class(train(i).genre);
 end
 
-Xt_audio = make_audio(train);
-Xq_audio = make_audio(quiz);
+% Xt_audio = make_audio(train);
+% Xq_audio = make_audio(quiz);
 
 %% Train SVM clfs
 % Split the data into train(80%)/test(20%) set
@@ -47,7 +47,7 @@ Xq_audio = make_audio(quiz);
 % save('Ytest_audio.mat', 'Ytest_audio');
 
 
-% [test_err info] = train_svm(Xtrain, Ytrain, Xtest, Ytest);
+[test_err info] = train_svm(Xtrain, Ytrain);
 
 %% "Train" just the intersection kernal
 best_loop_size = just_kernel_train(Xtrain, Ytrain);
