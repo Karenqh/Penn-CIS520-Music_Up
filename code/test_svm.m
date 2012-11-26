@@ -1,4 +1,4 @@
-function [test_err ranks info] = test_svm(Xtrain, Ytrain, Xtest, Ytest)
+function [loss scores info] = test_svm(Xtrain, Ytrain, Xtest, Ytest)
 % Scale the feature_vector
 Xtrain = bsxfun(@rdivide, Xtrain, sum(Xtrain, 2));
 Xtest = bsxfun(@rdivide, Xtest, sum(Xtest, 2));
