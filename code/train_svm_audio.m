@@ -1,4 +1,4 @@
-function [loss scores model] = train_svm_audio(Xtrain, Ytrain, Xtest, Ytest)
+function [loss scores test_err] = train_svm_audio(Xtrain, Ytrain, Xtest, Ytest)
 % Scale the audio_vector (different units)
 scale_mean = mean(Xtrain, 1);
 Xtrain = bsxfun(@minus, Xtrain, scale_mean);
@@ -9,6 +9,13 @@ scale_max = max(abs(Xtrain));
 Xtrain = bsxfun(@rdivide, Xtrain, scale_max);
 Xtest = bsxfun(@rdivide, Xtest, scale_max);
 % Better use the scaling tool built in Libsvm
+
+
+% % % What if we only use Timbre
+% Xtrain = Xtrain(:, 7:end);
+% Xtest = Xtest(:, 7:end);
+Xtrain(:, 5) = [];
+Xtest(:, 5) = [];
 
 % % Cross validation to choose the best gamma/C  (grid search)
 % bestcv = 0;
@@ -29,12 +36,25 @@ Xtest = bsxfun(@rdivide, Xtest, scale_max);
 % end
 % matlabpool close;
 
-% What if we only use Timbre
-Xtrain = Xtrain(:, 7:end);
-Xtest = Xtest(:, 7:end);
 
-% The best parameters are: C = 10^4, gamma = 10^3;
-cmd = ['-b 1 -c ', num2str(10^4), ' -g ', num2str(10^3)];
+% % The best parameters are: C = 10^4, gamma = 10^3;
+% cmd = ['-b 1 -c ', num2str(10^4), ' -g ', num2str(10^3)];
+% bestcv = svmtrain(Ytrain, Xtrain, cmd);
+
+
+
+% % Use knn on features 3,4,5
+% matlabpool open;
+% parfor dummy = -4:3
+%     log10c = 2*dummy;
+%     cmd = ['-b 1 -t 0 -v 8 -c ', num2str(10^log10c)];
+%     cv = svmtrain(Ytrain, Xtrain, cmd);
+%     fprintf('%g accuracy=%g)\n', log10c, cv)
+% end
+% matlabpool close;
+
+% Best C for linear kernel: 1???
+cmd = ['-b 1 -t 0 -c ', num2str(1)];
 bestcv = svmtrain(Ytrain, Xtrain, cmd);
 
 model = bestcv;
@@ -42,7 +62,11 @@ model = bestcv;
 % Use the bestcv result to make prediction on mock quiz dataset
 [yhat acc vals] = svmpredict(Ytest, Xtest, model, '-b 1');
 
-test_err = mean(yhat~=Ytest)
+% % Calculate the TP and FP
+% TP = sum(bsxfun(@and, yhat, Ytest))/length(Ytest)
+% FP = sum(bsxfun(@and, bsxfun(@xor, yhat, Ytest), yhat==0))/length(Ytest)
+
+test_err = mean(yhat~=Ytest);
 
 scores = zeros(size(Xtest,1), 10);
 label_seq = (model.Label)';
@@ -53,14 +77,15 @@ ranks = get_ranks(scores);
 loss = rank_loss(ranks, Ytest)
 
 
-% gamma = [1 5 10 15 20];  % what will be a proper sigma?
-% for i = 1:length(sigma)
-%     % train svm to get error for a certain sigma
-%     % maybe I should use the built-in RBF kernel and the built in cv
-%     for cv = 1:10
-%         % An iner
-%     end
-% end
+% % Further consider class 4 or 5
+% X_45 = Xtest;
+% X_45(~bsxfun(@or, yhat==4, yhat==5), :) = [];
+% % Feed X_45 into decision tree clf
+% % yhat45 = 
+% ranks(bsxfun(@and, yhat==5, yhat45==1), 1) = 4;
+% ranks(bsxfun(@and, yhat==4, yhat45==0),1) = 5;
+
+
 
 
 
