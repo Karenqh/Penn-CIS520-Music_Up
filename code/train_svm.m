@@ -18,12 +18,16 @@ kernel = @(x, x2) kernel_intersection(x, x2);
                                 xval_test_set, xval_test_label, kernel);
 display(num2str(xval_err));
 
-scores = zeros(size(xval_test_set,1), length(info.model.Label));
-label_seq = (info.model.Label)';
-for i = 1:size(xval_test_set,1)
-    scores(i, label_seq) = info.vals(i, :);
-end
-rank = get_ranks(scores);
-loss = rank_loss(rank, xval_test_label)
+% Calculate the TP and FP
+TP = sum(bsxfun(@and, info.yhat, xval_test_label))/length(xval_test_label)
+FP = sum(bsxfun(@and, bsxfun(@xor, info.yhat, xval_test_label), info.yhat==0))/length(xval_test_label)
+
+% scores = zeros(size(xval_test_set,1), length(info.model.Label));
+% label_seq = (info.model.Label)';
+% for i = 1:size(xval_test_set,1)
+%     scores(i, label_seq) = info.vals(i, :);
+% end
+% rank = get_ranks(scores);
+% loss = rank_loss(rank, xval_test_label)
     
 
